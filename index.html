@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>Подключение</title>
+  <style>
+    :root {
+      --bg: #f6f7f9; --card: #ffffff; --text: #1d2330; --muted: #5b6475;
+      --accent: #2f6fed; --accent-text: #ffffff; --border: #dfe3ea;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #12151b; --card: #1b2029; --text: #e9edf3; --muted: #9aa4b5;
+              --accent: #4d86ff; --border: #2c3442; }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text);
+           font: 17px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    main { max-width: 34rem; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+    h1 { font-size: 1.5rem; margin: .5rem 0 1rem; }
+    .note { background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+            padding: 1rem 1rem 1.1rem; margin-bottom: .9rem; }
+    .note p { margin: 0 0 .6rem; }
+    .note p:last-child { margin-bottom: 0; }
+    .btn { display: inline-block; margin: .2rem 0 .8rem; padding: .7rem 1.1rem; border-radius: 10px;
+           background: var(--accent); color: var(--accent-text); text-decoration: none; font-weight: 600; }
+    .muted { color: var(--muted); }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Инструкция теперь у каждого своя</h1>
+  <section class="note">
+    <p>У каждого — личная страница подключения: на ней шаги для вашего телефона или компьютера
+       и всегда свежие настройки.</p>
+    <p>Откройте ссылку, которую вам прислал наш бот или человек, который вас пригласил.</p>
+  </section>
+  <section class="note">
+    <p><b>Ссылки нет или она потерялась?</b> Откройте бота и нажмите «🔐 Подключить» — он пришлёт
+       вашу страницу.</p>
+    <a class="btn" href="tg://resolve?domain=paraguay_cocktail_kick_bot&amp;start=connect">Открыть бота</a>
+    <p class="muted">Если Telegram у вас не работает, попросите ссылку у того, кто рассказал вам о нас.</p>
+  </section>
+</main>
+</body>
+</html>

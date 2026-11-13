@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <!-- CSP: данные — только из gist'ов GitHub; сторонние скрипты, фреймы и формы запрещены.
+       Встроенный скрипт разрешён ('unsafe-inline'): данные из gist попадают на страницу только
+       через textContent и проверенные адреса, а connect-src не даёт ничего отправить на чужой сайт. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src https://gist.githubusercontent.com; base-uri 'none'; form-action 'none'">
+  <title>Ваша страница подключения</title>
+  <style>
+    :root {
+      --bg: #f6f7f9; --card: #ffffff; --text: #1d2330; --muted: #5b6475;
+      --accent: #2f6fed; --accent-text: #ffffff; --border: #dfe3ea; --ok: #1f9d55;
+      --warn-bg: #fff6e5; --warn-border: #f0c36d; --bad: #c0392b;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #12151b; --card: #1b2029; --text: #e9edf3; --muted: #9aa4b5;
+              --accent: #4d86ff; --border: #2c3442; --ok: #3ccf7e;
+              --warn-bg: #2b2414; --warn-border: #7a5d1f; --bad: #ff7b6b; }
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    .step { scroll-margin-top: 1rem; }
+    body { margin: 0; background: var(--bg); color: var(--text);
+           font: 17px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    main { max-width: 34rem; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+    h1 { font-size: 1.5rem; margin: .5rem 0 .5rem; }
+    h2 { font-size: 1.05rem; margin: 0 0 .35rem; }
+    .lead { color: var(--muted); margin: 0 0 1rem; }
+    .part { font-size: .85rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em;
+            color: var(--muted); margin: 1.5rem 0 .5rem; }
+    .step, .note { background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+                   padding: 1rem 1rem 1.1rem; margin-bottom: .9rem; }
+    .note.warn { background: var(--warn-bg); border-color: var(--warn-border); }
+    .note.news { border: 2px solid var(--accent); }
+    #news { margin-bottom: .9rem; }
+    body:not(.has-news) .next-new { display: none; }
+    .new { scroll-margin-top: 1rem; }
+    .has-news .new { border: 2px solid var(--accent); border-radius: 14px; }
+    .has-news li.new { padding: .3rem .5rem; margin: .2rem 0; }
+    .has-news .new::before { content: "📝 Новое"; display: block; font-size: .8rem; font-weight: 700;
+                             color: var(--accent); margin-bottom: .2rem; }
+    .step h2 { display: flex; gap: .5rem; align-items: center; }
+    .num { display: inline-grid; place-items: center; width: 1.7rem; height: 1.7rem; border-radius: 50%;
+           background: var(--accent); color: var(--accent-text); font-size: .95rem; flex: none; }
+    p { margin: .25rem 0 .75rem; color: var(--muted); }
+    .note p { color: var(--text); }
+    .btn { display: block; width: 100%; text-align: center; text-decoration: none; cursor: pointer;
+           padding: .95rem 1rem; border-radius: 12px; border: 1px solid var(--border);
+           background: var(--card); color: var(--text); font: inherit; font-weight: 600; margin-top: .5rem; }
+    .btn.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent);
+                   font-size: 1.15rem; padding: 1.1rem 1rem; }
+    .btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+    .alt { margin-top: .75rem; font-size: .95rem; }
+    .alt summary { cursor: pointer; color: var(--muted); }
+    .kv { display: grid; grid-template-columns: auto 1fr; gap: .25rem .75rem; margin: .5rem 0; }
+    .kv dt { color: var(--muted); }
+    .kv dd { margin: 0; font-family: ui-monospace, Menlo, Consolas, monospace; word-break: break-all; }
+    .ok { color: var(--ok); font-weight: 600; min-height: 1.5em; margin: .5rem 0 0; }
+    .msg { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1rem; }
+    .msg.bad { border-color: var(--bad); }
+    .msg b { display: block; margin-bottom: .25rem; }
+    .help ol { margin: .25rem 0 0; padding-left: 1.3rem; color: var(--text); }
+    .help li { margin: .35rem 0; }
+    .status { background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+              padding: .75rem 1rem; margin-bottom: .9rem; }
+    .status.ok { border-color: var(--ok); }
+    .status.down { border-color: var(--bad); background: var(--warn-bg); }
+    #status-text { margin: 0; color: var(--text); font-weight: 600; }
+    .status.unknown #status-text { color: var(--muted); font-weight: 400; }
+    #status-note { margin: .35rem 0 0; color: var(--text); }
+    #status-sub { display: inline-block; margin-top: .4rem; font-size: .95rem; color: var(--accent); }
+    .path { margin: .25rem 0 .75rem; padding-left: 1.3rem; }
+    .path li { margin: .3rem 0; }
+    .caution { background: var(--warn-bg); border: 1px solid var(--warn-border); border-radius: 10px;
+               padding: .6rem .75rem; color: var(--text); }
+    .search { width: 100%; font: inherit; padding: .7rem .8rem; margin: .5rem 0 .25rem; border-radius: 10px;
+              border: 1px solid var(--border); background: var(--bg); color: var(--text); }
+    .apps-group { margin: .75rem 0 .25rem; font-size: .8rem; font-weight: 600; text-transform: uppercase;
+                  letter-spacing: .05em; color: var(--muted); }
+    .apps-list { list-style: none; margin: 0; padding: 0; }
+    .apps-list li { padding: .45rem 0; border-bottom: 1px solid var(--border); color: var(--text); }
+    .apps-list li small { color: var(--muted); }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Ваша страница подключения</h1>
+
+  <div id="error" class="msg" hidden>
+    Эту страницу нужно открывать по личной ссылке — из нашего Telegram-бота
+    или из сообщения, которое вам прислали.
+  </div>
+  <p id="loading" class="lead" hidden>Загружаю ваши настройки…</p>
+  <div id="off" class="msg bad" hidden>
+    <b>Доступ отключён</b>
+    Обратитесь к тому, кто прислал вам эту ссылку, или напишите в наш бот.
+  </div>
+  <div id="gone" class="msg bad" hidden>
+    <b>Эта ссылка больше не действует</b>
+    Обратитесь к тому, кто прислал вам ссылку, или напишите в наш бот.
+  </div>
+
+  <div id="page" hidden>
+    <p class="lead">Здесь всё, чтобы работали Telegram и интернет. Страница личная — только для вас.</p>
+    <!-- Статус считает сам сервер по трафику людей; ⛔ ставит администратор. Данные — общий gist,
+         его адрес — в строке «status:» файла tg.txt -->
+    <div id="status" class="status unknown" hidden>
+      <p id="status-text"></p>
+      <p id="status-note" hidden></p>
+      <a id="status-sub" href="tg://resolve?domain=paraguay_cocktail_kick_bot&amp;start=status">🔔 Получать
+         уведомления о статусе в Telegram-боте</a>
+    </div>
+    <div id="stale" class="msg" hidden>
+      Не получилось проверить свежие настройки, поэтому показываю те, что записаны в ссылке.
+      Проверьте интернет и обновите страницу.
+    </div>
+
+    <!-- data-notice = PAGE_NOTICE_ID из .env ноды: пока этой метки нет на живой странице (и ещё 10 мин
+         после её появления), subsync не включает 📝 в Happ и бот не пишет в канал.
+         «Что нового»: показывается, если в tg.txt есть строка «notice: <код>» (её пишет subsync, пока
+         человек не нажал кнопку). Кнопка → бот /start seen_<код> → 📝 в Happ пропадает. -->
+    <!-- Новое на странице помечено классом «new» (подсветка — только пока новость не отмечена).
+         Вверху — кнопка «К новому» (по очереди ко всем видимым .new), внизу страницы — «Готово». -->
+    <section id="news" data-notice="2026-11-13-cdn" hidden>
+      <a id="news-go" class="btn primary" href="#">📝 К новому ↓</a>
+    </section>
+
+    <section class="note">
+      <h2>Сохраните эту страницу</h2>
+      <p>Не удаляйте сообщение с этой ссылкой или добавьте страницу на главный экран. Если после
+         очередной блокировки что-то перестанет работать, откройте её снова и нажмите кнопки ещё раз:
+         настройки здесь всегда свежие.</p>
+      <button id="save-copy" class="btn" type="button">Скопировать ссылку на эту страницу</button>
+      <div id="save-copied" class="ok"></div>
+      <details class="alt">
+        <summary>Как добавить на главный экран или в закладки</summary>
+        <p>Android, Chrome: меню ⋮ → «Добавить на главный экран».</p>
+        <p>iPhone, Safari: кнопка «Поделиться» → «На экран Домой».</p>
+        <p>Компьютер: добавьте страницу в закладки — Ctrl+D, на Mac ⌘D.</p>
+      </details>
+    </section>
+
+    <section class="note warn">
+      <h2>Ссылка только для вас</h2>
+      <p>Не пересылайте её другим людям. Чтобы подключить близкого, попросите для него отдельное
+         приглашение.</p>
+      <p>Свои устройства — телефон, компьютер, планшет — подключать можно, как это сделать, написано
+         внизу страницы.</p>
+    </section>
+
+    <!-- Telegram: кнопка tg://proxy открывает приложение напрямую, сайт t.me не нужен -->
+    <div id="tg" hidden>
+      <div class="part">Telegram</div>
+      <section class="step">
+        <h2><span class="num"></span> Нажмите «Подключить Telegram»</h2>
+        <p>Откроется Telegram и спросит, подключить ли прокси, — нажмите «Подключить».</p>
+        <a id="tg-connect" class="btn primary" href="#">Подключить Telegram</a>
+        <details class="alt">
+          <summary>Telegram не открылся?</summary>
+          <p>Если Telegram не установлен, установите его и нажмите кнопку ещё раз:</p>
+          <div id="tg-install"></div>
+          <p>Или добавьте прокси вручную. В Telegram: «Настройки» → «Данные и память» → «Прокси» →
+             «Добавить прокси» → MTProto. Перепишите:</p>
+          <dl class="kv">
+            <dt>Сервер</dt><dd id="tg-server"></dd>
+            <dt>Порт</dt><dd id="tg-port"></dd>
+            <dt>Ключ</dt><dd id="tg-secret"></dd>
+          </dl>
+          <button id="tg-copy" class="btn" type="button">Скопировать ключ</button>
+          <div id="tg-copied" class="ok"></div>
+        </details>
+        <details class="alt">
+          <summary>Как удалить старые прокси</summary>
+          <p>Оставьте <b id="tg-current"></b> — это актуальный. Старые помечены «Недоступен».</p>
+          <!-- показывается только строка для устройства, с которого открыта страница -->
+          <p data-os="android">«Настройки» → «Данные и память» → «Настройки прокси» → нажмите на
+             старую запись и удерживайте → значок корзины вверху.</p>
+          <p data-os="ios">«Настройки» → «Данные и память» → «Прокси» → смахните старую запись влево →
+             «Удалить».</p>
+          <p data-os="desktop">«Настройки» → «Продвинутые настройки» → «Тип соединения» → меню «⋮»
+             у старой записи → «Удалить».</p>
+        </details>
+      </section>
+    </div>
+
+    <div id="vpn" hidden>
+      <div class="part">Интернет (VPN)</div>
+      <section class="step">
+        <h2><span class="num"></span> Установите приложение Happ</h2>
+        <p>Если Happ уже установлен — пропустите этот шаг.</p>
+        <div id="install"></div>
+        <p id="ios-note" hidden>Если App Store пишет, что приложение недоступно в вашей стране, —
+           нужен Apple ID другой страны. Попросите помочь того, кто прислал вам ссылку.</p>
+      </section>
+
+      <section class="step">
+        <h2><span class="num"></span> Нажмите «Подключить»</h2>
+        <p>Откроется Happ и предложит добавить подписку — согласитесь.</p>
+        <a id="connect" class="btn primary" href="#">Подключить</a>
+        <details class="alt">
+          <summary>Не открывается приложение?</summary>
+          <p>Скопируйте ссылку, затем в Happ нажмите «+» и выберите «Вставить из буфера».</p>
+          <button id="copy" class="btn" type="button">Скопировать ссылку для Happ</button>
+          <div id="copied" class="ok"></div>
+        </details>
+        <p id="new-backup" class="note new">В подписке два сервера: <b>vless-reality</b> — основной, <b>cdn-backup</b> —
+           запасной. Если основной не подключается (так бывает на мобильном интернете), выберите
+           в Happ «cdn-backup».</p>
+        <!-- OneXray (iPhone): есть в российском App Store. Получает из gist полный конфиг xray.json —
+             тот же сервер и «российское напрямую», что у Happ -->
+        <details id="onexray" class="alt" hidden>
+          <summary>Happ нет в App Store? Подключите через OneXray</summary>
+          <p>1. Установите OneXray:</p>
+          <a class="btn" href="https://apps.apple.com/app/id6745748773" rel="noopener noreferrer">OneXray в App Store</a>
+          <p>2. Нажмите кнопку — OneXray откроется и предложит добавить подписку, согласитесь:</p>
+          <a id="onexray-add" class="btn primary" href="#">Подключить в OneXray</a>
+          <p>Российские сайты и приложения пойдут напрямую, остальное — через VPN. Значков статуса и
+             личной страницы в OneXray нет: статус смотрите здесь. После переезда сервера обновите
+             подписку в OneXray (на экране серверов).</p>
+        </details>
+      </section>
+
+      <section class="step">
+        <h2><span class="num"></span> Включите VPN</h2>
+        <p>В Happ нажмите большую круглую кнопку. Российские сайты и приложения продолжат работать
+           как обычно, остальное пойдёт через VPN.</p>
+      </section>
+
+      <!-- Российские приложения мимо VPN. Через подписку это можно только с Provider ID (бесплатно —
+           до 20 устройств, что сверх лимита — неизвестно), поэтому просим сделать вручную.
+           Список установленных приложений веб-странице недоступен — сверка идёт в самом Happ:
+           он показывает только установленные. -->
+      <section id="new-apps" class="step" data-os="android">
+        <h2><span class="num"></span> Важно: пустите российские приложения мимо VPN</h2>
+        <p>Некоторые российские приложения могут узнать, через какой адрес вы выходите в интернет, и
+           передать его. Тогда наш сервер заблокируют — у всех сразу. Если такие приложения идут мимо
+           VPN, они видят только ваш обычный адрес. Банки и Госуслуги к тому же лучше работают без VPN.</p>
+        <ol class="path">
+          <li>В Happ нажмите <b>⚙ Настройки</b> (вверху слева).</li>
+          <li>Внизу, в разделе <b>«Настройки туннеля»</b>, откройте <b>«Прокси для выбранных приложений»</b>.</li>
+          <li>Выберите режим <b>«Обход»</b>.</li>
+          <li>Отметьте приложения из списка ниже — те, что есть у вас на телефоне. В Happ есть поиск.</li>
+          <li class="new"><b>Telegram не отмечайте</b> — иначе в нём не будут работать звонки. Если он
+              уже отмечен, снимите отметку.</li>
+          <li>Выключите и снова включите VPN.</li>
+        </ol>
+        <p class="caution">Режим — именно «Обход». В режиме «Вкл» всё будет наоборот: через VPN пойдут
+           только отмеченные приложения, а YouTube, Instagram и остальные перестанут открываться.</p>
+        <p>Не отмечайте браузеры (Chrome, Яндекс Браузер) и зарубежные приложения — им VPN нужен.</p>
+        <details class="alt" open>
+          <summary>Список российских приложений</summary>
+          <input id="apps-q" class="search" type="search" placeholder="Поиск: например, банк или Яндекс"
+                 autocomplete="off" aria-label="Поиск по списку приложений">
+          <div id="apps"></div>
+          <p id="apps-none" hidden>Ничего не нашлось. Если приложение российское — его тоже можно отметить.</p>
+        </details>
+      </section>
+      <section id="new-max" class="step" data-os="ios">
+        <h2><span class="num"></span> Важно: Макс — без VPN</h2>
+        <p>Некоторые российские приложения могут узнать, через какой адрес вы выходите в интернет, и
+           передать его — тогда наш сервер заблокируют у всех. На iPhone нельзя пустить отдельное
+           приложение мимо VPN, поэтому <b>Макс открывайте с выключенным VPN</b>. Остальные российские
+           сайты и приложения и так идут напрямую.</p>
+      </section>
+
+      <!-- Без Provider ID Happ не принимает эти настройки из подписки, поэтому просим включить вручную -->
+      <section class="step">
+        <h2><span class="num"></span> Желательно: включите автоподключение</h2>
+        <p>В Happ у подписки нажмите <b>⋮</b> (три точки) → <b>«Настройки»</b> и включите три
+           переключателя:</p>
+        <ul>
+          <li><b>Update on open</b> — обновлять подписку при открытии Happ;</li>
+          <li><b>Ping on open</b> — проверять сервер при открытии;</li>
+          <li><b>Connect on open</b> — подключаться при открытии.</li>
+        </ul>
+        <p>Строку «Connect to» оставьте как есть — «Last used».</p>
+        <p>Если Happ на русском, названия будут со словами «при открытии».</p>
+        <p>Тогда при каждом запуске Happ сам обновит подписку, проверит сервер и подключится. После
+           переезда сервера VPN подхватит новый адрес сам — достаточно открыть Happ.</p>
+      </section>
+    </div>
+
+    <section class="note">
+      <h2>Компьютер и другие устройства</h2>
+      <p>Эта страница подходит для всех ваших устройств. Откройте её на компьютере или планшете
+         и нажмите те же кнопки — страница сама предложит нужные приложения.</p>
+      <p>Чтобы перенести ссылку, скопируйте её и отправьте себе, например письмом. Через Telegram
+         не получится: на новом устройстве он заработает только после подключения.</p>
+      <button id="dev-copy" class="btn" type="button">Скопировать ссылку на эту страницу</button>
+      <div id="dev-copied" class="ok"></div>
+    </section>
+
+    <section class="note help">
+      <h2>Если перестало работать</h2>
+      <ol>
+        <li id="help-tg" hidden>Telegram: откройте эту страницу и снова нажмите «Подключить Telegram».
+            Старые записи потом можно удалить — см. «Как удалить старые прокси».</li>
+        <li>Интернет: в Happ выключите VPN, обновите подписку и включите VPN снова.</li>
+        <li>Не помогло — напишите тому, кто прислал вам ссылку.</li>
+      </ol>
+    </section>
+  </div>
+
+  <section id="news-end" class="note news" hidden>
+    <h2>📝 Посмотрели новое?</h2>
+    <a id="news-ok" class="btn primary" href="#">Готово</a>
+    <p id="news-hint">Кнопка откроет наш Telegram-бот — он отметит, что вы всё прочитали, и значок 📝
+       в Happ пропадёт.</p>
+    <p id="news-done" class="ok" hidden>✓ Отмечено. Значок 📝 в Happ пропадёт через 5–10 минут —
+       когда Happ обновит подписку (закройте и снова откройте Happ).</p>
+  </section>
+</main>
+<script>
+  (function () {
+    // После # — данные для подключения; на сервер страницы эта часть адреса не отправляется.
+    //   #https%3A%2F%2Fgist…/raw/sub.txt      — адрес личного gist'а (бот и приглашения)
+    //   #sub=…&server=…&port=…&secret=…      — старые сообщения: подписка и прокси прямо в ссылке
+    // Если подписка лежит в gist, страница читает оттуда свежие данные: sub.txt (включён ли доступ)
+    // и tg.txt (прокси Telegram). Так одна и та же ссылка работает и после переезда на новый IP.
+    var GIST = /^https:\/\/gist\.githubusercontent\.com\/[A-Za-z0-9-]+\/[0-9a-f]+\/raw\/sub\.txt$/;
+    var frag = location.hash.slice(1), sub = "", px = null;
+    try {
+      if (/^(sub|server)=/.test(frag)) {
+        var q = new URLSearchParams(frag);
+        sub = q.get("sub") || "";
+        px = checkPx(q);
+      } else {
+        sub = decodeURIComponent(frag);
+      }
+    } catch (e) { sub = ""; px = null; }
+    if (!/^https:\/\/[^\s"'<>]+$/.test(sub)) { sub = ""; }
+
+    function $(id) { return document.getElementById(id); }
+    function show(id) { $(id).hidden = false; }
+
+    function checkPx(q) {
+      var server = q.get("server") || "", port = q.get("port") || "", secret = q.get("secret") || "";
+      if (/^[A-Za-z0-9.-]{1,253}$/.test(server) && /^[0-9]{1,5}$/.test(port) &&
+          +port >= 1 && +port <= 65535 && /^[0-9a-fA-F]{32,512}$/.test(secret)) {
+        return { server: server, port: port, secret: secret };
+      }
+      return null;
+    }
+    function parseTg(text) {
+      var m = /tg:\/\/proxy\?(\S+)/.exec(text || "");
+      return m ? checkPx(new URLSearchParams(m[1])) : null;
+    }
+    // Статус: tg.txt → строка «status: <адрес общего gist'а>» → {"state","checked","updated","note"}
+    var STATUS = /^https:\/\/gist\.githubusercontent\.com\/[A-Za-z0-9-]+\/[0-9a-f]+\/raw\/status\.json$/;
+    function statusUrl(text) {
+      var m = /^status:\s*(\S+)\s*$/m.exec(text || "");
+      return m && STATUS.test(m[1]) ? m[1] : "";
+    }
+    function renderStatus(s) {
+      var now = Date.now() / 1000, box = $("status"), cls = "unknown",
+          msg = "Статус: нет свежих данных", note = "";
+      // updated старше 40 минут — сервер не присылает новостей (или он недоступен вовсе)
+      if (s && typeof s === "object" && now - (+s.updated || 0) <= 40 * 60) {
+        if (s.state === "down") {
+          cls = "down";
+          msg = "⛔ Сейчас недоступен из России. Нажмите кнопки ещё раз, когда статус вернётся в «Доступен».";
+          note = typeof s.note === "string" ? s.note : "";
+        } else if (s.state === "ok" && now - (+s.checked || 0) <= 60 * 60) {
+          var mins = Math.floor((now - s.checked) / 60);
+          cls = "ok";
+          msg = "✅ Доступен из России · проверено " + (mins < 1 ? "только что" : mins + " мин назад");
+        }
+      }
+      box.className = "status " + cls;
+      $("status-text").textContent = msg;
+      $("status-note").textContent = note;
+      $("status-note").hidden = !note;
+      box.hidden = false;
+    }
+
+    function get(url) {   // null — файла нет (404); исключение — сеть или GitHub недоступны
+      return fetch(url, { cache: "no-store", credentials: "omit", referrerPolicy: "no-referrer" })
+        .then(function (r) {
+          if (r.status === 404) { return null; }
+          if (!r.ok) { throw new Error("HTTP " + r.status); }
+          return r.text();
+        });
+    }
+
+    if (!sub && !px) { show("error"); return; }
+    if (!GIST.test(sub)) { render(false); return; }
+
+    show("loading");
+    var tgUrl = sub.replace(/\/sub\.txt$/, "/tg.txt");
+    Promise.all([get(sub), get(tgUrl).catch(function () { return null; })]).then(function (r) {
+      $("loading").hidden = true;
+      if (r[0] === null) { show("gone"); return; }
+      // ссылки построчно или JSON-подписка (массив конфигов Xray с outbound vless)
+      if (!/^(vless|vmess|trojan|ss|hysteria2|hy2|hysteria|tuic|wireguard|wg):\/\//m.test(r[0]) &&
+          !/"protocol":\s*"vless"/.test(r[0])) {
+        show("off"); return;
+      }
+      px = parseTg(r[1]) || px;
+      render(false);
+      var nc = /^notice:\s*([0-9a-f]{16})\s*$/m.exec(r[1] || "");
+      // Уже нажимали на этом устройстве — не показываем: GitHub отдаёт tg.txt из кэша до 5 минут.
+      // Код свой для каждого обновления, поэтому следующее обновление снова покажет плашку.
+      var acked = "";
+      try { acked = localStorage.getItem("news-ack") || ""; } catch (e) { acked = ""; }
+      if (nc && nc[1] !== acked) {
+        $("news-ok").href = "tg://resolve?domain=paraguay_cocktail_kick_bot&start=seen_" + nc[1];
+        $("news-ok").addEventListener("click", function () {
+          try { localStorage.setItem("news-ack", nc[1]); } catch (e) { /* без памяти — не страшно */ }
+          $("news-ok").hidden = true; $("news-hint").hidden = true; $("news-done").hidden = false;
+          document.body.classList.remove("has-news"); $("news").hidden = true;   // «Дальше ↓» скрывает CSS
+        });
+        document.body.classList.add("has-news");
+        // Новые места, видимые на этом устройстве (на Android их больше, чем на iPhone)
+        var news = Array.prototype.filter.call(document.querySelectorAll(".new"),
+          function (el) { return el.offsetParent !== null; });
+        var go = function (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); };
+        news.forEach(function (el, i) {
+          if (i === news.length - 1) {
+            // под последним — «Готово» (в список <ol> блок не кладём — ставим после списка)
+            var anchor = el.tagName === "LI" ? el.parentNode : el;
+            anchor.parentNode.insertBefore($("news-end"), anchor.nextSibling);
+            return;
+          }
+          // под остальными — «Дальше ↓» к следующему новому месту
+          var next = document.createElement("a");
+          next.className = "btn next-new"; next.href = "#"; next.textContent = "Дальше ↓";
+          next.addEventListener("click", function (ev) { ev.preventDefault(); go(news[i + 1]); });
+          if (el.tagName === "LI") el.appendChild(next); else el.parentNode.insertBefore(next, el.nextSibling);
+        });
+        // вверху — «К новому»: к первому новому месту
+        $("news-go").addEventListener("click", function (ev) {
+          ev.preventDefault(); go(news.length ? news[0] : $("news-end"));
+        });
+        show("news"); show("news-end");
+      }
+      var su = statusUrl(r[1]);
+      if (su) {
+        get(su).then(function (t) {
+          var s = null;
+          try { s = JSON.parse(t); } catch (e) { s = null; }
+          renderStatus(s);
+        }, function () { renderStatus(null); });
+      }
+    }, function () {
+      $("loading").hidden = true;
+      render(true);
+    });
+
+    function appsList() {
+      // Российские приложения, которые стоит пустить мимо VPN (названия — как на телефоне).
+      // Браузеры сюда не входят: через них открывают и заблокированные сайты.
+      var APPS = [
+        ["Главное", ["Макс (MAX) — мессенджер", "Госуслуги", "RuStore"]],
+        ["Банки и оплата", ["СберБанк Онлайн", "Т-Банк", "ВТБ Онлайн", "Альфа-Банк", "Газпромбанк",
+          "Райффайзен Банк", "Совкомбанк, Халва", "ПСБ", "Почта Банк", "Россельхозбанк", "МТС Банк",
+          "Ozon Банк", "ЮMoney", "Mir Pay", "СБПэй"]],
+        ["Соцсети, почта, видео", ["ВКонтакте", "VK Мессенджер", "VK Видео", "VK Музыка", "Одноклассники",
+          "Почта Mail", "Дзен", "Rutube", "Кинопоиск", "Okko", "Wink", "Иви", "Premier", "Start"]],
+        ["Яндекс", ["Яндекс (с Алисой)", "Яндекс Go", "Яндекс Карты", "Яндекс Навигатор", "Яндекс Музыка",
+          "Яндекс Маркет", "Яндекс Еда", "Яндекс Лавка", "Яндекс Почта", "Яндекс Диск"]],
+        ["Покупки и доставка", ["Ozon", "Wildberries", "Авито", "Мегамаркет", "Купер", "Самокат",
+          "Пятёрочка", "Перекрёсток", "Магнит", "ВкусВилл", "Лента", "Додо Пицца"]],
+        ["Государство и город", ["Госуслуги Дом", "Налоги ФЛ", "Моя Москва (mos.ru)", "ЕМИАС"]],
+        ["Связь", ["Мой МТС", "Мой Билайн", "МегаФон", "Т2 (Tele2)", "Ростелеком", "Yota"]],
+        ["Транспорт и прочее", ["2ГИС", "РЖД Пассажирам", "Туту", "Аэрофлот", "hh.ru", "Сбер ID"]]
+      ];
+      var box = $("apps");
+      APPS.forEach(function (g) {
+        var h = document.createElement("div"); h.className = "apps-group"; h.textContent = g[0];
+        var ul = document.createElement("ul"); ul.className = "apps-list";
+        g[1].forEach(function (name) {
+          var li = document.createElement("li"); li.textContent = name; ul.appendChild(li);
+        });
+        box.appendChild(h); box.appendChild(ul);
+      });
+      var norm = function (s) { return s.toLowerCase().replace(/ё/g, "е"); };
+      $("apps-q").addEventListener("input", function () {
+        var q = norm(this.value.trim()), any = false;
+        Array.prototype.forEach.call(box.querySelectorAll(".apps-list"), function (ul) {
+          var group = norm(ul.previousSibling.textContent), shown = 0;
+          Array.prototype.forEach.call(ul.children, function (li) {
+            var hit = !q || norm(li.textContent).indexOf(q) >= 0 || group.indexOf(q) >= 0;
+            li.hidden = !hit; if (hit) { shown++; }
+          });
+          ul.hidden = ul.previousSibling.hidden = shown === 0;
+          if (shown) { any = true; }
+        });
+        $("apps-none").hidden = any;
+      });
+    }
+
+    function render(stale) {
+      show("page");
+      $("stale").hidden = !stale;
+
+      var ua = navigator.userAgent || "";
+      var kind = /android/i.test(ua) ? "android"
+               : (/iphone|ipad|ipod|macintosh/i.test(ua) && "ontouchend" in document) ? "ios" : "desktop";
+      var os = /windows/i.test(ua) ? "win" : /macintosh|mac os x/i.test(ua) ? "mac"
+             : /linux|x11/i.test(ua) ? "linux" : "";
+      Array.prototype.forEach.call(document.querySelectorAll("[data-os]"), function (el) {
+        el.hidden = el.getAttribute("data-os") !== kind;
+      });
+      function buttons(boxId, list) {
+        var box = $(boxId);
+        list.forEach(function (s) {
+          var a = document.createElement("a");
+          a.className = "btn"; a.href = s[1]; a.textContent = s[0];
+          a.rel = "noopener noreferrer";
+          box.appendChild(a);
+        });
+      }
+      function copier(buttonId, okId, text) {
+        $(buttonId).addEventListener("click", function () {
+          var done = function () { $(okId).textContent = "Скопировано ✓"; };
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(done, function () { prompt("Скопируйте:", text); });
+          } else {
+            prompt("Скопируйте:", text);
+          }
+        });
+      }
+      copier("save-copy", "save-copied", location.href);
+      copier("dev-copy", "dev-copied", location.href);
+
+      if (px) {
+        show("tg"); show("help-tg");
+        $("tg-connect").href = "tg://proxy?server=" + encodeURIComponent(px.server) +
+          "&port=" + px.port + "&secret=" + px.secret;
+        $("tg-current").textContent = px.server + ":" + px.port;
+        $("tg-server").textContent = px.server;
+        $("tg-port").textContent = px.port;
+        $("tg-secret").textContent = px.secret;
+        buttons("tg-install", {
+          android: [["Google Play", "https://play.google.com/store/apps/details?id=org.telegram.messenger"],
+                    ["Скачать APK с telegram.org", "https://telegram.org/dl/android/apk"]],
+          ios: [["App Store", "https://apps.apple.com/app/telegram-messenger/id686449807"]],
+          desktop: [["Telegram для компьютера", "https://desktop.telegram.org/"]]
+        }[kind]);
+        copier("tg-copy", "tg-copied", px.secret);
+      }
+
+      if (sub) {
+        show("vpn");
+        $("connect").href = "happ://add/" + sub;
+        if (kind === "ios" && GIST.test(sub)) {
+          $("onexray-add").href = "onexray://onexray.com/sub/add?url=" +
+            encodeURIComponent(sub.replace(/\/sub\.txt$/, "/xray.json")) +
+            "&mode=providerManaged#" + encodeURIComponent("Paraguay Cocktail");
+          $("onexray").hidden = false;
+        }
+        var HAPP = "https://github.com/Happ-proxy/happ-desktop/releases/latest/download/";
+        var happDesktop = {
+          win: [["Windows", HAPP + "setup-Happ.x64.exe"]],
+          mac: [["macOS", HAPP + "Happ.macOS.universal.dmg"]],
+          linux: [["Linux (.deb)", HAPP + "Happ.linux.x64.deb"], ["Linux (.rpm)", HAPP + "Happ.linux.x64.rpm"]]
+        };
+        buttons("install", {
+          android: [["Google Play", "https://play.google.com/store/apps/details?id=com.happproxy"],
+                    ["Скачать APK", "https://github.com/Happ-proxy/happ-android/releases/latest/download/Happ.apk"]],
+          ios: [["App Store", "https://apps.apple.com/ru/app/happ-proxy-utility-plus/id6746188973"]],
+          desktop: happDesktop[os] || happDesktop.win.concat(happDesktop.mac, happDesktop.linux)
+        }[kind]);
+        $("ios-note").hidden = kind !== "ios";
+        copier("copy", "copied", sub);
+      }
+
+      if (sub && kind === "android") { appsList(); }
+
+      // Нумерация шагов — по порядку видимых блоков
+      var n = 0;
+      Array.prototype.forEach.call(document.querySelectorAll(".num"), function (el) {
+        if (el.offsetParent !== null) { el.textContent = ++n; }
+      });
+    }
+  })();
+</script>
+</body>
+</html>
